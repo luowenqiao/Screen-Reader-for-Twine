@@ -1,35 +1,27 @@
-chrome.runtime.onMessage.addListener(function(request, sender) {
-  if (request.action == "getSource") {
-    message.innerText = "Start Reading...";
-    var synth = window.speechSynthesis;
-    var utterThis = new SpeechSynthesisUtterance(request.source);
-    // utterThis.onend = function (event) {
-    //     console.log('SpeechSynthesisUtterance.onend');
-    // }
-    // utterThis.onerror = function (event) {
-    //     console.error('SpeechSynthesisUtterance.onerror');
-    // }
+// Initialize the start button 
+let changeColor = document.getElementById("startReader");
 
-    utterThis.voice = synth.getVoices()[0];
-    utterThis.pitch = 1;
-    utterThis.rate = 1;
-    synth.speak(utterThis); 
-  }
+// When the button is clicked, inject startScreenReader into current page
+// TODO: 1. Execute automatically(or by control) instead of clicking a button 
+// TODO: 2. Send messages or check whether the extraction is done correctly
+changeColor.addEventListener("click", async () => {
+
+  // Here the document refers to popup.html, this log is in background
+  console.log(document);
+
+  //Inject and execute the script on the current page
+  let [tab] = await chrome.tabs.query({ active: true, currentWindow: true });
+  chrome.scripting.executeScript({
+    target: { tabId: tab.id },
+    function: startScreenReader,
+  });
+  
 });
 
-function onWindowLoad() {
+// This function will be executed as a content script inside the current page
+function startScreenReader() {
 
-  var message = document.querySelector('#message');
-
-  chrome.tabs.executeScript(null, {
-    file: "getTwineSource.js"
-  }, function() {
-    // If you try and inject into an extensions page or the webstore/NTP you'll get an error
-    if (chrome.runtime.lastError) {
-      message.innerText = 'There was an error injecting script : \n' + chrome.runtime.lastError.message;
-    }
-  });
+  // Here the document refers to the current page, this log is in current page
+  console.log("current page ",document);
 
 }
-
-window.onload = onWindowLoad;

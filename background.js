@@ -1,3 +1,7 @@
-// This is a script for the console information
+// background.js
 
-console.log("background");
+//let color = '#ffab11';
+
+chrome.runtime.onInstalled.addListener(() => {
+  console.log('background js and document loaded');
+});

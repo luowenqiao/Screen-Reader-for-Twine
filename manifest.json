@@ -1,19 +1,23 @@
 {
   "name": "Twine Screen Reader",
   "version": "0.1",
-  "manifest_version": 2,
+  "manifest_version": 3,
   "description": "A screen reader for Twine games.",
+  "author":"Luowen Qiao",
+  "icons":{
+    "16":"icon.png",
+    "32":"icon.png",
+    "48":"icon.png",
+    "128":"icon.png"
+  },
 
-  "browser_action": {
-    "default_popup": "popup.html",
-    "default_icon": {
-      "16":"icon.png",
-      "48":"icon.png",
-      "128":"icon.png"
-    }
+  "background": {
+    "service_worker": "background.js"
   },
-  "background":{
-    "scripts":["background.js"]
+
+  "action":{
+    "default_popup":"popup.html"
   },
-  "permissions": ["tabs", "<all_urls>"]
+
+  "permissions": ["storage", "activeTab", "scripting"]
 }
