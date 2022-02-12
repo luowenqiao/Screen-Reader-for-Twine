@@ -3,11 +3,19 @@
 <head>
     <meta charset="UTF-8">
     <title>Title</title>
-   
 </head>
-<body style="width:400px; min-height: 100px;">
-    <h1>Screen Reader for Twine</h1>
-    <button id="startReader">Start Reader</button>
+<body style="width: 300px;height:200px">
+    <h1>Screen Reader Extension for Twine</h1>
+    <p id="info"></p>
+
+    <!-- <audio id="notification" src="notification.wav"></audio> -->
+
+    <button id="expand">Expand</button>
+    <button id="shrink">Shrink</button>
+
+    <script src="jsonText.js"></script>
     <script src='popup.js'></script>
+    <script src="interaction.js"></script>
+    
 </body>
 </html>
