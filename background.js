@@ -36,6 +36,7 @@ chrome.tabs.onUpdated.addListener((tabId, change, tab) => {
   }
 });
 
+
 // Run when content-script sends message
 chrome.runtime.onMessage.addListener(
   function(request, sender, sendResponse) {

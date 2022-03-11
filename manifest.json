@@ -24,6 +24,16 @@
     "activeTab", 
     "scripting",
     "tabs",
-    "tts"
+    "tts",
+    "commands"
+  ],
+
+  "web_accessible_resources": [
+    {
+      "resources": [ "mask_image.jpeg" ],
+      "matches": [ "https://*/*","http://*/*","file:///*" ]
+    }
   ]
+
+  
 }

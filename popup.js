@@ -10,6 +10,34 @@ String.prototype.splice = function(start, newStr) {
 
 var notificationAudio = new Audio("notification.wav");
 
+// Read the initial information
+// chrome.tts.speak("Thank you for using Chrome screen reader extension for Twine. \
+// Please leave the extension panel open and use keyboard to control the page. \
+// To move through the content, use arrow up and arrow down. \
+// To move inside the selected tags, use arrow right. \
+// To move outside the parent selected tags, use arrow left. \
+// To click the link, use shift. \
+// To read the selected content, use space. \
+// To stop reading, use S. \
+// When some page content changes, there will be a notification sound played as a hint. \
+// Following are the Twine content: ")
+
+// Add a mask image onto the current image
+// chrome.tabs.query({ active: true, currentWindow: true }, function(tabs){
+//     chrome.scripting.executeScript({
+//         target: { tabId: tabs[0].id},
+//         function: addMaskImage
+//     });
+// });
+// function addMaskImage(){
+//     const maskImg = document.createElement('img');
+//     maskImg.src = "chrome-extension://ijimfckofldclldflofhgfpppmklfgif/mask_image.jpeg";
+//     maskImg.style.width=window.innerWidth;
+//     maskImg.style.height=window.innerHeight;
+//     maskImg.style.position="absolute"
+//     document.body.append(maskImg);
+// }
+
 // Run on the current tab DOM
 // Check if it's an online itch file or local/normal file
 // Bool CurrentItch stored in background console
@@ -31,15 +59,19 @@ chrome.tabs.query({ active: true, currentWindow: true }, function(tabs){
                     domBody.innerHTML = results[0].result.dom;
                     domBody=domBody.childNodes[0];
                     var finalTextToRead = DOMToTextSugarCube(domBody);
+                    pageContent = results[0].result.dom;
+                    currentContent= results[0].result.dom;
                     //console.log(finalTextToRead)
-                    chrome.tts.speak(finalTextToRead);
+                    chrome.tts.speak(finalTextToRead,{'enqueue':true});
                 }
                 if(results[0].result.format == "Harlowe"){
                     var domBody = document.createElement('div')
                     domBody.innerHTML = results[0].result.dom;
                     var finalTextToRead = DOMToTextHarlowe(domBody);
+                    pageContent = results[0].result.dom;
+                    currentContent= results[0].result.dom;
                     console.log(finalTextToRead)
-                    chrome.tts.speak(finalTextToRead);
+                    chrome.tts.speak(finalTextToRead,{'enqueue':true});
                 }
             });
         }
@@ -69,14 +101,16 @@ function getStoryFormatandContent(){
         }
 
         // This part is for checking page updates
-        chrome.runtime.sendMessage({
-            content:storyContent.innerText
-        });
-        document.body.onclick=()=>{
-            chrome.runtime.sendMessage({
-                content:storyContent.innerText
-            });
-        }
+        // chrome.runtime.sendMessage({
+        //     content:storyContent.innerText
+        // });
+
+
+        // document.body.onclick=()=>{
+        //     chrome.runtime.sendMessage({
+        //         content:storyContent.innerText
+        //     });
+        // }
 
         // Return the document content for extraction
         return {
@@ -173,10 +207,3 @@ function additionalInfo(DOMelement){
     return '';
 }
 
-// Play the notification sound when there's updates
-chrome.runtime.onMessage.addListener(
-    function(request, sender, sendResponse) {
-      if (request.notification == true){}
-        notificationAudio.play();
-    }
-);
