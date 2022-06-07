@@ -79,7 +79,7 @@ chrome.runtime.onMessage.addListener(
 
     // Tutorial
     if(request.openTutorial){
-      chrome.windows.create({ url: chrome.runtime.getURL("TutorialA.html"), type: 
+      chrome.windows.create({ url: "https://luowenqiao.github.io/Screen-Reader-for-Twine/tutorial.html", type: 
     "normal", height : 800, width : 500 });
       //chrome.tts.speak("Welcome to the screen reader for Twine game tutorial.")
     }

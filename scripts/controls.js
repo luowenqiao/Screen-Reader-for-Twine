@@ -6,26 +6,60 @@
 
 // Keyboard Controls
 function keyboardControl(){
+
     document.addEventListener("keydown",function(event){
-        speakKeyboard(event.key);
-        switch(event.key){
-            case "ArrowUp": 
-                isSetting?settingUp():moveUp();break;
-            case "ArrowDown": 
-                isSetting?settingDown():moveDown();break;
-            case "ArrowLeft":
-                isSetting?settingLeft():moveOutside();break;
-            case "ArrowRight": 
-                isSetting?settingRight():moveInside();break;
-            case "Shift":
-                isSetting?null:clickAction();break;
-            case " ":
-                isSetting?null:startOrStop();break;
-            case "z":
-                settings();break;
-            case "1":
-                openTutorial();break;
-            default:break;
+        
+        // 1. up
+        if(event.metaKey && event.shiftKey && event.key == "ArrowUp")
+        {
+            isSetting?settingUp():moveUp();
+        }
+
+        // 2. down
+        if(event.metaKey && event.shiftKey && event.key == "ArrowDown")
+        {
+            isSetting?settingDown():moveDown();
+        }
+
+        // 3. left (outside)
+        if(event.metaKey && event.shiftKey && event.key == "ArrowLeft")
+        {
+            isSetting?settingLeft():moveOutside();
+        }
+
+        // 4. right (inside)
+        if(event.metaKey && event.shiftKey && event.key == "ArrowRight")
+        {
+            isSetting?settingRight():moveInside();
+        }
+
+        // 5. space (read)
+        if(event.metaKey && event.shiftKey && event.key == " ")
+        {
+            isSetting?null:startOrStop();
+        }
+
+        // 6. interact (click)
+        if(event.metaKey && event.shiftKey && event.key == "Enter")
+        {
+            isSetting?null:clickAction();
+        }
+
+        // 7. settings (s)
+        if(event.metaKey && event.shiftKey && event.key == "s")
+        {   
+            settings();
+        }
+
+        // 8. tutorial
+        if(event.metaKey && event.shiftKey && event.key == "1")
+        {
+            openTutorial();
+        }
+        
+        if(event.location == 0 && !(event.metaKey || event.altKey || event.shiftKey || event.ctrlKey))
+        {
+            speakKeyboard(event.key)
         }
     })
 }
@@ -154,7 +188,8 @@ function settingRight(){//Add
 }
 
 function speakKeyboard(keyName){
-    //chrome.runtime.sendMessage({textToRead: keyName,enqueueBool: false});
+
+    chrome.runtime.sendMessage({textToRead: ["\\&",keyName],enqueueBool: false});
 }
 function moveUp(){
 
