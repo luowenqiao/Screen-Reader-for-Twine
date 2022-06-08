@@ -29,7 +29,9 @@
   ],
 
   "permissions": [
-    "tts"
+    "tts",
+    "storage",
+    "tabs"
   ]
 
   

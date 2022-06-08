@@ -27,6 +27,7 @@ function isTwinePage(){
 // Read out the content
 function readContent(DOMelement,enqueueBool){
     var textToRead = DOMToText(DOMelement);
+    console.log(textToRead)
     chrome.runtime.sendMessage({textToRead: textToRead,enqueueBool: enqueueBool});
 }
 
@@ -49,24 +50,24 @@ function DOMToText(DOMelement){
         && isVisible(DOMelement))
         {
             if(nodeToText[DOMelement.nodeName]!=''){
-                textToRead.push('\\*');
+                textToRead.push('A');
                 textToRead.push(nodeToText[DOMelement.nodeName]);
             }
             if(additionalInfo(DOMelement)!=''){
-                textToRead.push('\\*');
+                textToRead.push('A');
                 textToRead.push(additionalInfo(DOMelement));
             }
             // Add node values like text
             if(DOMelement.nodeValue)
             {
-                textToRead.push('\\&');
+                textToRead.push('B');
                 textToRead.push(DOMelement.nodeValue);
             }
         }
 
         // Node type 3: nodeValue
         if(DOMelement.nodeType == 3 && DOMelement.nodeValue){
-            textToRead.push('\\&');
+            textToRead.push('B');
             textToRead.push(DOMelement.nodeValue);
         }
 
@@ -77,11 +78,11 @@ function DOMToText(DOMelement){
     if(nodeToText.hasOwnProperty(DOMelement.nodeName) && isVisible(DOMelement)){
 
         if(nodeToText[DOMelement.nodeName]!=''){
-            textToRead.push('\\*');
+            textToRead.push('A');
             textToRead.push(nodeToText[DOMelement.nodeName]);
         }
         if(additionalInfo(DOMelement)!=''){
-            textToRead.push('\\*');
+            textToRead.push('A');
             textToRead.push(additionalInfo(DOMelement));
         }
 

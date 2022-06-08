@@ -54,7 +54,12 @@ function keyboardControl(){
         // 8. tutorial
         if(event.metaKey && event.shiftKey && event.key == "1")
         {
-            openTutorial();
+            if(window.location.href == tutorialUrl){
+                closeTutorial();
+            }
+            else{  
+                openTutorial();
+            }
         }
         
         if(event.location == 0 && !(event.metaKey || event.altKey || event.shiftKey || event.ctrlKey))
@@ -66,6 +71,9 @@ function keyboardControl(){
 
 function openTutorial(){
     chrome.runtime.sendMessage({openTutorial:true});
+}
+function closeTutorial(){
+    chrome.runtime.sendMessage({closeTutorial:true});
 }
 
 function settings(){
@@ -114,9 +122,13 @@ function settingLeft(){//Minus
     let needNotify = false;
     switch(settingItem){
         case 2://rate
-            if(speechRate>0.5) speechRate-=0.1;break;
+            if(speechRate>0.5) speechRate-=0.1;
+            speechRate = Math.round(speechRate*10)/10;
+            break;
         case 3://volume
-            if(speechVolume>0.2) speechVolume-=0.1;break;
+            if(speechVolume>0.2) speechVolume-=0.1;
+            speechVolume = Math.round(speechVolume*10)/10;
+            break;
         case 4://keyboard control
             if(useVoice == false)
             {
@@ -152,9 +164,13 @@ function settingRight(){//Add
     let needNotify = false;
     switch(settingItem){
         case 2://rate
-            if(speechRate<2.0) speechRate+=0.1;break;
+            if(speechRate<2.0) speechRate+=0.1;
+            speechRate = Math.round(speechRate*10)/10;
+            break;
         case 3://volume
-            if(speechVolume<1.0) speechVolume+=0.1;break;
+            if(speechVolume<1.0) speechVolume+=0.1;
+            speechVolume = Math.round(speechVolume*10)/10;
+            break;
         case 4://keyboard control
             if(useVoice == false)
             {
@@ -520,7 +536,7 @@ function voiceControl(){
     const SpeechGrammarList = window.SpeechGrammarList || webkitSpeechGrammarList;
     const SpeechRecognitionEvent = window.SpeechRecognitionEvent || webkitSpeechRecognitionEvent;
 
-    const command = ["up","down","outside","inside","click","read","stop"];
+    const command = ["up","down","outside","inside","click","read","stop","settings"];
     const grammar = '#JSGF V1.0; grammar commands; public <command> = ' + command.join(' | ') + ' ;'
 
     const recognition = new SpeechRecognition();
@@ -534,28 +550,36 @@ function voiceControl(){
     recognition.interimResults = false;
     recognition.maxAlternatives = 1;
 
-    document.body.ondoubleclick = function() {
-        recognition.start();
-        //console.log('Ready to receive a command.');
-    }
+    document.addEventListener("keydown",function(event){
+        // voice control
+        if(event.metaKey && event.shiftKey && event.key == "2")
+        {
+            recognition.start();
+        }
+    });
 
     recognition.onresult = function(event) {
         let commandResult = event.results[0][0].transcript;
         if(command.includes(commandResult)){
             switch(commandResult){
                 case "up": 
-                    moveUp();break;
+                    isSetting?settingUp():moveUp();break;
                 case "down": 
-                    moveDown();break;
+                    isSetting?settingDown():moveDown();break;
                 case "outside":
-                    moveOutside();break;
+                    isSetting?settingLeft():moveOutside();break;
                 case "inside": 
-                    moveInside();break;
+                    isSetting?settingRight():moveInside();break;
                 case "click":
-                    clickAction();break;
+                    isSetting?null:clickAction();break;
                 case "read":
                 case "stop":
-                    startOrStop();break;
+                    isSetting?null:startOrStop();break;
+                case "settings":
+                    settings();break;
+                case "tutorial":
+                    openTutorial();break;
+                default:break;
             }
         }
     }

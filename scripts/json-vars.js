@@ -18,6 +18,9 @@ var useKeyboard = true;
 var useVoice = false;
 var settingItem = 1;
 
+// For tutorials
+var tutorialUrl = "https://luowenqiao.github.io/Screen-Reader-for-Twine/tutorial.html";
+
 // Tag parsing
 var nodeToText = {
     // basic html
