@@ -2,13 +2,13 @@
 // Run as console
 
 // for settings
-// item: voice control, rate, volume, keyboard control
+// item: rate, volume, keyboard control, voice control
 var speechRate,speechRate,keyboardControl,voiceControl;
 var items=[
-  "Open or close the voice control, currently is ",
-  "Speaking rate, from zero point five to two point zero, each step is point one. Current rate is: ",
-  "Speaking Volume, from zero point one to one, each step is point one. Current volume is: ",
-  "Open or close the keyboard control, currently is "
+  "Currently selecting: Speaking rate, from zero point five to two point zero, each step is point one. Current rate is: ",
+  "Currently selecting: Speaking Volume, from zero point one to one, each step is point one. Current volume is: ",
+  "Currently selecting: Open or close the keyboard control, currently is ",
+  "Currently selecting: Open or close the voice control, currently is ",
 ];
 
 // for tutorial
@@ -83,37 +83,60 @@ chrome.runtime.onMessage.addListener(
 
     // Open/Close setting
     if(request.isSetting==1){
-      normalSpeak(
-        "Settings is opened. " +
-        "Use Command, Shift, Up or Down to select items, " +
-        "use Command, Shift, left or right to modify them."
-      );
+      chrome.storage.sync.get(['speechRate'], function(result) {
+        normalSpeak(
+          "Settings is opened. " +
+          "Use Command, Shift, Left or Right to select items, " +
+          "use Command, Shift, Up or Down to modify them. "
+          + items[0] + result.speechRate
+        );
+      });
+      
     }
-    if(request.isSetting==0){
+    if(request.isSetting==2){
       normalSpeak(
         "Settings is closed. Screen reader is on."
       )
     }
+    if(request.isSetting == 3){
+      normalSpeak(
+        "Settings is closed. Tutorial is on."
+      )
+    }
 
     // Settings & change storage
-    if(request.settingItem == 2){// speech rate
+    if(request.settingItem == 1){// speech rate
       chrome.storage.sync.set({speechRate:request.speechRate})
       normalSpeak(items[request.settingItem-1]+request.speechRate)
     }
-    if(request.settingItem == 3){ // speech volume
-      chrome.storage.sync.set({speechVolume:request.speechVolume.toFixed(1)})
+    if(request.settingItem == 2){ // speech volume
+      chrome.storage.sync.set({speechVolume:request.speechVolume})
       normalSpeak(items[request.settingItem-1]+request.speechVolume)
     }
-    if(request.settingItem==4){ // keyboard control
+    if(request.settingItem==3){ // keyboard control
       chrome.storage.sync.set({keyboardControl:request.useKeyboard})
       let appendText = request.useKeyboard?" opening.":" closed."
       normalSpeak(items[request.settingItem-1]+appendText)
     }
-    if(request.settingItem==1){ // voice control
+    if(request.settingItem==4){ // voice control
       chrome.storage.sync.set({voiceControl:request.useVoice})
       let appendText = request.useVoice?" opening.":" closed."
       normalSpeak(items[request.settingItem-1]+appendText)
     }
+
+    // Tutorial
+    if(request.isTutorial == 1){
+     normalSpeak("Welcome to the screen reader for Twine tutorial. "
+     +"You can press Command, Shift, One at any time to go back to the game. "
+     +"Press Command, Shift, Space to start or stop reading.")
+    }
+    if(request.isTutorial == 2){
+      normalSpeak("Tutorial is closed. Screen reader is on.")
+    }
+    if(request.isTutorial == 3){
+      normalSpeak("Tutorial is closed. Settings is on.")
+    }
+
 
     // Tutorial
     if(request.openTutorial){
@@ -125,6 +148,20 @@ chrome.runtime.onMessage.addListener(
         chrome.tabs.remove(tabs[0].id);
         chrome.tts.stop();
       });
+    }
+
+    if(request.tutorialItem == 0){
+      chrome.tts.isSpeaking(
+        function (speaking){
+          if(speaking){
+            chrome.tts.stop();
+          }
+          else{
+            normalSpeak("This is an example sentence. "
+            +"You can press Command, Shift, Arrow Left or Arrow Right to select the content.")
+          }
+        }
+      )
     }
   }
 );

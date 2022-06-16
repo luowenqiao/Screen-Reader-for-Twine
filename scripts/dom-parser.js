@@ -27,7 +27,7 @@ function isTwinePage(){
 // Read out the content
 function readContent(DOMelement,enqueueBool){
     var textToRead = DOMToText(DOMelement);
-    console.log(textToRead)
+    //console.log(textToRead)
     chrome.runtime.sendMessage({textToRead: textToRead,enqueueBool: enqueueBool});
 }
 
@@ -108,6 +108,28 @@ function additionalInfo(DOMelement){
         }
         return DOMelement.getAttribute("type")?DOMelement.getAttribute("type"):'';
     }
+    if(DOMelement.nodeName=="TW-INCLUDE")
+    {
+        if(DOMelement.getAttribute("type")=="header"){
+            return "header"
+        }
+        if(DOMelement.getAttribute("type")=="footer"){
+            return "footer"
+        }
+        if(DOMelement.getAttribute("type")=="startup"){
+            return "startup"
+        }
+    }
+    if(DOMelement.nodeName=="TW-ICON")
+    {
+        if(DOMelement.getAttribute("title")=="Undo"){
+            return "undo"
+        }
+        if(DOMelement.getAttribute("title")=="Redo"){
+            return "redo"
+        }
+    }
+    
     return '';
 }
 

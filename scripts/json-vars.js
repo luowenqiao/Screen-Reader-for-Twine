@@ -11,12 +11,17 @@ var directionSound = new Audio();
 directionSound.src = "data:audio/mp3;base64,"+directionSrc;
 
 // For settings, set to default
+var currentStage = 0; // 0 - screen reader, 1 - settings, 2 - tutorial
+var isSetting = false;
+var isTutorial = false;
+
 var speechRate = 1.0;
 var speechVolume = 1.0;
-var isSetting = false;
 var useKeyboard = true;
 var useVoice = false;
+
 var settingItem = 1;
+var tutorialItem = 0;
 
 // For tutorials
 var tutorialUrl = "https://luowenqiao.github.io/Screen-Reader-for-Twine/tutorial.html";
@@ -25,12 +30,12 @@ var tutorialUrl = "https://luowenqiao.github.io/Screen-Reader-for-Twine/tutorial
 var nodeToText = {
     // basic html
     "TITLE":"title",
-    "H1":"heading 1",
-    "H2":"heading 2",
-    "H3":"heading 3",
-    "H4":"heading 4",
-    "H5":"heading 5",
-    "H6":"heading 6",
+    "H1":"heading level 1",
+    "H2":"heading level 2",
+    "H3":"heading level 3",
+    "H4":"heading level 4",
+    "H5":"heading level 5",
+    "H6":"heading level 6",
     "P":"paragraph",
     //"BR":" "this could ignore the br
     "HR":"horizontal rule",
@@ -59,10 +64,11 @@ var nodeToText = {
     
     // images
     "IMG":"image",
-    "SVG":"svg image",
+    "SVG":"scalable vector graphics",
 
     // audio & video
     "VIDEO":"video",
+    "AUDIO":"audio",
 
     // links
     "A":"link",
@@ -94,6 +100,8 @@ var nodeToText = {
     "TW-HOOK":"",
     "TW-ALIGN":"",
     "TW-ENCHANTMENT":"link",
-    "TW-INCLUDE":""
+    "TW-INCLUDE":"",
+    "TW-SIDEBAR":"side bar",
+    "TW-ICON":"icon"
 }
 

@@ -9,9 +9,9 @@ function frameDisplay(){
     var rect = currentContent.getBoundingClientRect()
 
     var frameDiv = document.createElement("div")
-    frameDiv.id = "twine-selection-frame-display"
+    frameDiv.id = "twine-selection-frame-display";
     frameDiv.style.position = "absolute";
-    frameDiv.style.zIndex = "2147483647";
+    frameDiv.style.zIndex = "2147483645";
     frameDiv.style.border = "gold 2px solid";
     frameDiv.style.borderRadius = "4px";
     frameDiv.style.boxShadow = "0px 0px 8px gold"
@@ -22,6 +22,14 @@ function frameDisplay(){
     frameDiv.style.pointerEvents = "none";
 
     document.body.insertBefore(frameDiv, document.body.firstChild);
+
+    initialSettings();
+    initialTutorial();
+
+    window.onresize = () => {
+        changeDisplay();
+        changeSettingsDisplay();
+    }
 }
 
 function changeDisplay(){
@@ -38,7 +46,6 @@ function changeDisplay(){
             frameDiv.style.width = (rect.width+8) +"px";
             frameDiv.style.height = (rect.height+8) +"px";
         }
-        
     }
     else{
         if(currentContent.nodeType == 1){

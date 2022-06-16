@@ -22,6 +22,8 @@
         "scripts/sound-source.js",
         "scripts/json-vars.js",
         "scripts/dom-parser.js",
+        "scripts/settings.js",
+        "scripts/tutorial.js",
         "scripts/ui-display.js",
         "scripts/controls.js",
         "scripts/main.js"]

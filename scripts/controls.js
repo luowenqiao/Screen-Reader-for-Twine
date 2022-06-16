@@ -5,50 +5,98 @@
 /* ---------------------------------------------------------------------------- */
 
 // Keyboard Controls
+// Settings in settings.js
 function keyboardControl(){
 
     document.addEventListener("keydown",function(event){
-        
-        // 1. up
-        if(event.metaKey && event.shiftKey && event.key == "ArrowUp")
+        // 1. up (outside)
+        if(event.metaKey && event.shiftKey && event.key == "ArrowUp" && useKeyboard)
         {
-            isSetting?settingUp():moveUp();
+            if(currentStage == 0 || currentStage == 2){ // screen reader
+                moveOutside();
+            }
+            if(currentStage == 1){ // settings
+                settingUp();
+            }
+            // if(currentStage == 2){ // tutorial
+            //     //
+            // }
         }
 
-        // 2. down
-        if(event.metaKey && event.shiftKey && event.key == "ArrowDown")
+        // 2. down (inside)
+        if(event.metaKey && event.shiftKey && event.key == "ArrowDown" && useKeyboard)
         {
-            isSetting?settingDown():moveDown();
+            if(currentStage == 0 || currentStage == 2){ // screen reader
+                moveInside();
+            }
+            if(currentStage == 1){ // settings
+                settingDown();
+            }
+            // if(currentStage == 2){ // tutorial
+            //     null;
+            // }
         }
 
-        // 3. left (outside)
-        if(event.metaKey && event.shiftKey && event.key == "ArrowLeft")
+        // 3. left (choose)
+        if(event.metaKey && event.shiftKey && event.key == "ArrowLeft" && useKeyboard)
         {
-            isSetting?settingLeft():moveOutside();
+            if(currentStage == 0 || currentStage == 2){ // screen reader
+                moveUp();
+            }
+            if(currentStage == 1){ // settings
+                settingLeft();
+            }
+            // if(currentStage == 2){ // tutorial
+            //     null;
+            // }
         }
 
-        // 4. right (inside)
-        if(event.metaKey && event.shiftKey && event.key == "ArrowRight")
+        // 4. right (choose)
+        if(event.metaKey && event.shiftKey && event.key == "ArrowRight" && useKeyboard)
         {
-            isSetting?settingRight():moveInside();
+            if(currentStage == 0 || currentStage == 2){ // screen reader
+                moveDown();
+            }
+            if(currentStage == 1){ // settings
+                settingRight();
+            }
+            // if(currentStage == 2){ // tutorial
+            //     null;
+            // }
         }
 
         // 5. space (read)
-        if(event.metaKey && event.shiftKey && event.key == " ")
+        if(event.metaKey && event.shiftKey && event.key == " " && useKeyboard)
         {
-            isSetting?null:startOrStop();
+            if(currentStage == 0 || currentStage == 2){ // screen reader
+                startOrStop();
+            }
+            if(currentStage == 1){ // settings
+                null;
+            }
+            // if(currentStage == 2){ // tutorial seq 0
+            //     changeTutorial(0);
+            // }
         }
 
         // 6. interact (click)
-        if(event.metaKey && event.shiftKey && event.key == "Enter")
+        if(event.metaKey && event.shiftKey && event.key == "Enter" && useKeyboard)
         {
-            isSetting?null:clickAction();
+            if(currentStage == 0 || currentStage == 2){ // screen reader
+                clickAction();
+            }
+            if(currentStage == 1){ // settings
+                null;
+            }
+            // if(currentStage == 2){ // tutorial
+            //     null;
+            // }
         }
 
         // 7. settings (s)
         if(event.metaKey && event.shiftKey && event.key == "s")
         {   
-            settings();
+            settingsControl();
         }
 
         // 8. tutorial
@@ -61,12 +109,35 @@ function keyboardControl(){
                 openTutorial();
             }
         }
+
+        // 9. display for tutorial
+        // if(currentStage == 2){
+        //     if(event.metaKey){
+        //         displayMeta();
+        //     }
+        //     if(event.shiftKey){
+        //         displayShift();
+        //     }
+        //     //displayKey(event.key)
+        // }
         
         if(event.location == 0 && !(event.metaKey || event.altKey || event.shiftKey || event.ctrlKey))
         {
             speakKeyboard(event.key)
         }
     })
+
+    // document.addEventListener("keyup",function(event){
+    //     if(currentStage == 2){
+    //         if(event.key == "Meta"){
+    //             cancelMeta();
+    //         }
+    //         if(event.key == "Shift"){
+    //             cancelShift();
+    //         }
+    //         //cancelKey(event.key)
+    //     }
+    // })
 }
 
 function openTutorial(){
@@ -76,137 +147,10 @@ function closeTutorial(){
     chrome.runtime.sendMessage({closeTutorial:true});
 }
 
-function settings(){
-    isSetting = !isSetting;
-    if(isSetting){
-        chrome.runtime.sendMessage({isSetting:1});
-        settingItem = 1;
-    }
-    else{
-        chrome.runtime.sendMessage({isSetting:0});
-    }
-}
-
-function settingUp(){
-    //currently 4 items: rate, volume, keyboard control, voice control
-    if(settingItem > 1){
-        settingItem -= 1;
-    }else{
-        settingItem = 4;
-    }
-    chrome.runtime.sendMessage({
-        settingItem:settingItem,
-        speechRate:speechRate,
-        speechVolume:speechVolume,
-        useVoice:useVoice,
-        useKeyboard:useKeyboard
-    });
-}
-
-function settingDown(){
-    if(settingItem < 4){
-        settingItem+=1;
-    }else{
-        settingItem = 1;
-    }
-    chrome.runtime.sendMessage({
-        settingItem:settingItem,
-        speechRate:speechRate,
-        speechVolume:speechVolume,
-        useVoice:useVoice,
-        useKeyboard:useKeyboard
-    });
-}
-
-function settingLeft(){//Minus
-    let needNotify = false;
-    switch(settingItem){
-        case 2://rate
-            if(speechRate>0.5) speechRate-=0.1;
-            speechRate = Math.round(speechRate*10)/10;
-            break;
-        case 3://volume
-            if(speechVolume>0.2) speechVolume-=0.1;
-            speechVolume = Math.round(speechVolume*10)/10;
-            break;
-        case 4://keyboard control
-            if(useVoice == false)
-            {
-                chrome.runtime.sendMessage({needNotify:true});
-                needNotify = true;
-            }
-            if(useVoice == true){
-                useKeyboard = !useKeyboard;
-            }
-            break;
-        case 1://voice control
-            if(useKeyboard == false){
-                chrome.runtime.sendMessage({needNotify:true});
-                needNotify = true;
-            }   
-            if(useKeyboard == true){
-                useVoice = !useVoice;
-            }
-            break;
-        default:break;
-    }
-    if(!needNotify){
-        chrome.runtime.sendMessage({
-            settingItem:settingItem,
-            speechRate:speechRate,
-            speechVolume:speechVolume,
-            useVoice:useVoice,
-            useKeyboard:useKeyboard
-        });
-    }
-}
-function settingRight(){//Add
-    let needNotify = false;
-    switch(settingItem){
-        case 2://rate
-            if(speechRate<2.0) speechRate+=0.1;
-            speechRate = Math.round(speechRate*10)/10;
-            break;
-        case 3://volume
-            if(speechVolume<1.0) speechVolume+=0.1;
-            speechVolume = Math.round(speechVolume*10)/10;
-            break;
-        case 4://keyboard control
-            if(useVoice == false)
-            {
-                chrome.runtime.sendMessage({needNotify:true});
-                needNotify = true;
-            }
-            if(useVoice == true){
-                useKeyboard = !useKeyboard;
-            }
-            break;
-        case 1://voice control
-            if(useKeyboard == false){
-                chrome.runtime.sendMessage({needNotify:true});
-                needNotify = true;
-            }   
-            if(useKeyboard == true){
-                useVoice = !useVoice;
-            }
-            break;
-        default:break;
-    }
-    if(!needNotify){
-        chrome.runtime.sendMessage({
-            settingItem:settingItem,
-            speechRate:speechRate,
-            speechVolume:speechVolume,
-            useVoice:useVoice,
-            useKeyboard:useKeyboard
-        });
-    }
-}
-
 function speakKeyboard(keyName){
-
     chrome.runtime.sendMessage({textToRead: ["\\&",keyName],enqueueBool: false});
 }
+
 function moveUp(){
 
     directionSound.play();
@@ -335,7 +279,7 @@ function moveInside(){
     if(currentContent.hasChildNodes()){
         if(currentContent.childNodes.length >1)
         {
-            let tempChildNode=findChildNode(currentContent.firstChild)
+            let tempChildNode = findChildNode(currentContent.firstChild)
             if(tempChildNode != null){
                 currentContent = tempChildNode;
             }
@@ -345,8 +289,13 @@ function moveInside(){
                 }
             }
         }
+        else{
+            if(currentContent.childNodes.length == 1 && currentContent.firstChild.nodeType != 3){
+                currentContent = currentContent.firstChild;
+            }
+        }
+        
     }
-
     changeDisplay(currentContent);
     readContent(currentContent,false)
 }
@@ -361,8 +310,8 @@ function findChildNode(element){
        return element;
     }
     else{
-        if(element.nextSibling){
-            return findChildNode(element.nextSibling)
+        if(element.nextElementSibling){
+            return findChildNode(element.nextElementSibling)
         }
         else{
             return null;
@@ -442,6 +391,9 @@ function clickAction(){
                 tempContent.focus();break;
             case "SELECT":
                 tempContent.click();break;
+            case "TW-ICON":
+                console.log("herehere")
+                tempContent.click();break;
             case "INPUT":
                 switch(tempContent.type){
                     case "checkbox":   
@@ -481,7 +433,8 @@ function isInteractable(element){
     || element.tagName == "INPUT" || element.tagName == "SELECT"
     || element.tagName == "TEXTAREA"
     || element.tagName == "TW-LINK" 
-    || element.tagName == "TW-ENCHANTMENT"){
+    || element.tagName == "TW-ENCHANTMENT"
+    || element.tagName == "TW-ICON"){
         return true
     }
     else return false;
@@ -518,12 +471,23 @@ function updateListener(){
     });
     });
 
-    observer.observe(document.body, {
-        characterDataOldValue: true, 
-        subtree: true, 
-        childList: true, 
-        characterData: true
-    });
+    if( storyFormat == "SugarCube"){
+        observer.observe(document.getElementById("passages"), {
+            characterDataOldValue: true, 
+            subtree: true, 
+            childList: true, 
+            characterData: true
+        });
+    }
+    if( storyFormat == "Harlowe"){
+        observer.observe(document.querySelector("tw-story"), {
+            characterDataOldValue: true, 
+            subtree: true, 
+            childList: true, 
+            characterData: true
+        });
+    }
+    
 }
 
 /* ---------------------------------------------------------------------------- */
@@ -545,21 +509,22 @@ function voiceControl(){
     speechRecognitionList.addFromString(grammar, 1);
 
     recognition.grammars = speechRecognitionList;
-    recognition.continuous = false;
+    recognition.continuous = true;
     recognition.lang = 'en-US';
     recognition.interimResults = false;
     recognition.maxAlternatives = 1;
 
     document.addEventListener("keydown",function(event){
         // voice control
-        if(event.metaKey && event.shiftKey && event.key == "2")
+        if(event.metaKey && event.shiftKey && event.key == "2" && useVoice)
         {
             recognition.start();
         }
     });
 
     recognition.onresult = function(event) {
-        let commandResult = event.results[0][0].transcript;
+        let commandResult = event.results[event.results.length-1][0].transcript;
+        commandResult = commandResult.trim();
         if(command.includes(commandResult)){
             switch(commandResult){
                 case "up": 
@@ -576,7 +541,7 @@ function voiceControl(){
                 case "stop":
                     isSetting?null:startOrStop();break;
                 case "settings":
-                    settings();break;
+                    settingsControl();break;
                 case "tutorial":
                     openTutorial();break;
                 default:break;
@@ -584,7 +549,7 @@ function voiceControl(){
         }
     }
 
-    recognition.onspeechend = function() {
-        recognition.stop();
-    }
+    // recognition.onspeechend = function() {
+    //     recognition.stop();
+    // }
 }
