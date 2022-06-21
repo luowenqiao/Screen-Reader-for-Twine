@@ -1,6 +1,6 @@
 {
   "name": "Screen Reader for Twine",
-  "version": "0.1",
+  "version": "0.1.2",
   "manifest_version": 3,
   "description": "A screen reader for Twine-made games.",
   "author":"Luowen Qiao",
@@ -26,6 +26,7 @@
         "scripts/tutorial.js",
         "scripts/ui-display.js",
         "scripts/controls.js",
+        "scripts/update.js",
         "scripts/main.js"]
     }
   ],
@@ -35,6 +36,4 @@
     "storage",
     "tabs"
   ]
-
-  
 }

@@ -9,8 +9,16 @@
 function keyboardControl(){
 
     document.addEventListener("keydown",function(event){
+
+        let systemKey;
+        if(systemName.indexOf("Mac")!=-1){
+            systemKey = event.metaKey;
+        }else{
+            systemKey = event.ctrlKey;
+        }
+
         // 1. up (outside)
-        if(event.metaKey && event.shiftKey && event.key == "ArrowUp" && useKeyboard)
+        if( systemKey && event.shiftKey && event.key == "ArrowUp" && useKeyboard)
         {
             if(currentStage == 0 || currentStage == 2){ // screen reader
                 moveOutside();
@@ -24,7 +32,7 @@ function keyboardControl(){
         }
 
         // 2. down (inside)
-        if(event.metaKey && event.shiftKey && event.key == "ArrowDown" && useKeyboard)
+        if(systemKey && event.shiftKey && event.key == "ArrowDown" && useKeyboard)
         {
             if(currentStage == 0 || currentStage == 2){ // screen reader
                 moveInside();
@@ -38,7 +46,7 @@ function keyboardControl(){
         }
 
         // 3. left (choose)
-        if(event.metaKey && event.shiftKey && event.key == "ArrowLeft" && useKeyboard)
+        if(systemKey && event.shiftKey && event.key == "ArrowLeft" && useKeyboard)
         {
             if(currentStage == 0 || currentStage == 2){ // screen reader
                 moveUp();
@@ -52,7 +60,7 @@ function keyboardControl(){
         }
 
         // 4. right (choose)
-        if(event.metaKey && event.shiftKey && event.key == "ArrowRight" && useKeyboard)
+        if(systemKey && event.shiftKey && event.key == "ArrowRight" && useKeyboard)
         {
             if(currentStage == 0 || currentStage == 2){ // screen reader
                 moveDown();
@@ -66,7 +74,7 @@ function keyboardControl(){
         }
 
         // 5. space (read)
-        if(event.metaKey && event.shiftKey && event.key == " " && useKeyboard)
+        if(systemKey && event.shiftKey && event.key == " " && useKeyboard)
         {
             if(currentStage == 0 || currentStage == 2){ // screen reader
                 startOrStop();
@@ -80,7 +88,7 @@ function keyboardControl(){
         }
 
         // 6. interact (click)
-        if(event.metaKey && event.shiftKey && event.key == "Enter" && useKeyboard)
+        if(systemKey && event.shiftKey && event.key == "Enter" && useKeyboard)
         {
             if(currentStage == 0 || currentStage == 2){ // screen reader
                 clickAction();
@@ -94,13 +102,13 @@ function keyboardControl(){
         }
 
         // 7. settings (s)
-        if(event.metaKey && event.shiftKey && event.key == "s")
+        if(systemKey && event.shiftKey && event.key == "s")
         {   
             settingsControl();
         }
 
         // 8. tutorial
-        if(event.metaKey && event.shiftKey && event.key == "1")
+        if(systemKey && event.shiftKey && event.key == "1")
         {
             if(window.location.href == tutorialUrl){
                 closeTutorial();
@@ -108,6 +116,18 @@ function keyboardControl(){
             else{  
                 openTutorial();
             }
+        }
+
+        // 9. move through all the links
+        if(systemKey && event.shiftKey && event.altKey && useKeyboard)
+        {
+            if(currentStage == 0 || currentStage == 2){ // screen reader
+                moveInteractable();
+            }
+            if(currentStage == 1){ // settings
+                null;
+            }
+            
         }
 
         // 9. display for tutorial
@@ -140,6 +160,37 @@ function keyboardControl(){
     // })
 }
 
+function getInteractableNodes(){
+    let interactableNodes = Array.from(storyContent.querySelectorAll("a, form, input, textarea, button, select, optgroup, option, tw-link, tw-enchantment, tw-icon"));
+    for(let i =0;i<interactableNodes.length;i++){
+        if(!isVisible(interactableNodes[i])){
+            interactableNodes.splice(i,i+1)
+        }
+    }
+    return interactableNodes;
+}
+
+function moveInteractable(){
+
+    // move through links
+    if(interactableNodes.indexOf(currentContent) != -1){
+        // is selecting nodes, move to the next
+        if(currentInteract<interactableNodes.length-1){
+            currentInteract = interactableNodes.indexOf(currentContent)+1;
+        }
+        else{
+            currentInteract = 0;
+        } 
+    }else{
+        // not selecting nodes, select from the start
+        currentInteract = 0;
+   }
+
+   currentContent = interactableNodes[currentInteract];
+   readContent(currentContent,false);
+   changeDisplay();
+}
+
 function openTutorial(){
     chrome.runtime.sendMessage({openTutorial:true});
 }
@@ -154,6 +205,9 @@ function speakKeyboard(keyName){
 function moveUp(){
 
     directionSound.play();
+
+    let tempContent = currentContent;
+
     // When move from the root story node's first child child Node (first story node),
     // move upside to the parent node
     if((currentContent.parentNode.parentNode == storyContent && storyFormat == "SugarCube")
@@ -167,9 +221,12 @@ function moveUp(){
             currentContent = previousNode;
         }
         
-        changeDisplay();
-        readContent(currentContent,false);
-
+        if(tempContent == currentContent){
+            chrome.runtime.sendMessage({hint:1,txt:getContent(currentContent)})
+        }else{
+            changeDisplay();
+            readContent(currentContent,false);
+        }
         return;
     }
 
@@ -181,8 +238,13 @@ function moveUp(){
         currentContent = previousNode;
     }
 
-    changeDisplay();
-    readContent(currentContent,false)
+    if(tempContent == currentContent){
+        chrome.runtime.sendMessage({hint:1,txt:getContent(currentContent)})
+    }else{
+        changeDisplay();
+        readContent(currentContent,false)
+    }
+    
 }
 function findPreviousNode(element){
     if(element.previousSibling){
@@ -206,6 +268,9 @@ function findPreviousNode(element){
 function moveDown(){
 
     directionSound.play();
+
+    let tempContent = currentContent; // a temp content to check if the selection changed or not
+
     // When move from the root story node, move inside to the first node
     if(currentContent == storyContent)
     {    
@@ -229,9 +294,13 @@ function moveDown(){
             }
         }
         
-        changeDisplay();
-        readContent(currentContent,false);
-
+        if(currentContent == tempContent){
+            chrome.runtime.sendMessage({hint:2,txt:getContent(currentContent)})
+        }else{
+            changeDisplay();
+            readContent(currentContent,false);    
+        }
+       
         return;
     }
 
@@ -243,8 +312,13 @@ function moveDown(){
         currentContent = nextNode;
     }
     
-    changeDisplay();
-    readContent(currentContent,false)
+    if(currentContent == tempContent){// have reached the end of the content
+        chrome.runtime.sendMessage({hint:2,txt:getContent(currentContent)})
+    }
+    else{
+        changeDisplay();
+        readContent(currentContent,false)
+    }
 }
 
 function findNextNode(element){
@@ -269,6 +343,8 @@ function findNextNode(element){
 function moveInside(){
 
     directionSound.play();
+
+    let tempContent = currentContent;
 
     // Move one step further for sugarcube
     if((currentContent == storyContent) && storyFormat == "SugarCube"){
@@ -296,8 +372,13 @@ function moveInside(){
         }
         
     }
-    changeDisplay(currentContent);
-    readContent(currentContent,false)
+
+    if(tempContent == currentContent){
+        chrome.runtime.sendMessage({hint:2,txt:getContent(currentContent)})
+    }else{
+        changeDisplay(currentContent);
+        readContent(currentContent,false)
+    }
 }
 
 function findChildNode(element){
@@ -323,6 +404,8 @@ function moveOutside(){
 
     directionSound.play();
 
+    let tempContent = currentContent;
+
     // Move index to the parent node
     if(currentContent != storyContent){
         if((currentContent.parentNode.parentNode == storyContent && storyFormat == "SugarCube")
@@ -336,8 +419,12 @@ function moveOutside(){
         }
     }
 
-    changeDisplay();
-    readContent(currentContent,false)
+    if(tempContent == currentContent){
+        chrome.runtime.sendMessage({hint:1,txt:getContent(currentContent)})
+    }else{
+        changeDisplay();
+        readContent(currentContent,false)
+    }
 }
 
 
@@ -392,7 +479,6 @@ function clickAction(){
             case "SELECT":
                 tempContent.click();break;
             case "TW-ICON":
-                console.log("herehere")
                 tempContent.click();break;
             case "INPUT":
                 switch(tempContent.type){
@@ -447,51 +533,6 @@ function startOrStop(){
 
 /* ---------------------------------------------------------------------------- */
 /* ---------------------------------------------------------------------------- */
-/* ----------------------------   Update Listener   --------------------------- */
-/* ---------------------------------------------------------------------------- */
-/* ---------------------------------------------------------------------------- */
-
-function updateListener(){
-    let observer = new MutationObserver((mutations) => {
-    mutations.forEach((mutation) => {
-        let oldValue = mutation.oldValue;
-        let newValue = mutation.target.textContent;
-        if (oldValue !== newValue) {
-            // an update occurs
-            if( storyFormat == "SugarCube"){
-                storyContent = document.getElementById("passages")
-            }
-            if( storyFormat == "Harlowe"){
-                storyContent = document.querySelector("tw-passage")    
-            }
-            currentContent = storyContent;
-            notificationSound.play();
-            changeDisplay();
-        }
-    });
-    });
-
-    if( storyFormat == "SugarCube"){
-        observer.observe(document.getElementById("passages"), {
-            characterDataOldValue: true, 
-            subtree: true, 
-            childList: true, 
-            characterData: true
-        });
-    }
-    if( storyFormat == "Harlowe"){
-        observer.observe(document.querySelector("tw-story"), {
-            characterDataOldValue: true, 
-            subtree: true, 
-            childList: true, 
-            characterData: true
-        });
-    }
-    
-}
-
-/* ---------------------------------------------------------------------------- */
-/* ---------------------------------------------------------------------------- */
 /* ------------------------------   Voice Control   --------------------------- */
 /* ---------------------------------------------------------------------------- */
 /* ---------------------------------------------------------------------------- */
@@ -515,8 +556,16 @@ function voiceControl(){
     recognition.maxAlternatives = 1;
 
     document.addEventListener("keydown",function(event){
+
+        let systemKey;
+        if(systemName.indexOf("Mac")!=-1){
+            systemKey = event.metaKey;
+        }else{
+            systemKey = event.ctrlKey;
+        }
+
         // voice control
-        if(event.metaKey && event.shiftKey && event.key == "2" && useVoice)
+        if(systemKey && event.shiftKey && event.key == "2" && useVoice)
         {
             recognition.start();
         }

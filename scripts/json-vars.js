@@ -4,6 +4,9 @@ var storyFormat, storyContent;
 // For storing selection positions
 var currentContent;
 
+// For key setting
+var systemName;
+
 // Feedback Sounds
 var notificationSound = new Audio();
 notificationSound.src = "data:audio/wav;base64,"+notificationSrc;
@@ -20,8 +23,13 @@ var speechVolume = 1.0;
 var useKeyboard = true;
 var useVoice = false;
 
+// item index for sending message to background.js for read out
 var settingItem = 1;
 var tutorialItem = 0;
+
+// index and array to record the interactable elements on the current page
+var currentInteract = 0;
+var interactableNodes;
 
 // For tutorials
 var tutorialUrl = "https://luowenqiao.github.io/Screen-Reader-for-Twine/tutorial.html";
@@ -102,6 +110,7 @@ var nodeToText = {
     "TW-ENCHANTMENT":"link",
     "TW-INCLUDE":"",
     "TW-SIDEBAR":"side bar",
-    "TW-ICON":"icon"
+    "TW-ICON":"icon",
+    "TW-COLLAPSED":""
 }
 

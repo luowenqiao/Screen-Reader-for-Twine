@@ -18,11 +18,16 @@ async function main(){
     // Executes when the page is Twine game
     if(isTwinePage()){
 
+        systemName = navigator.userAgent;
+       
+        // Get Initial Interactables
+        interactableNodes = getInteractableNodes();
+
         // Display UI selesction
         frameDisplay()
 
         // Start Message (tutorial)
-        chrome.runtime.sendMessage({situation: "start"});
+        chrome.runtime.sendMessage({situation: "start",systemName:systemName});
 
         // Keyboard Controls
         keyboardControl();

@@ -10,6 +10,8 @@ var items=[
   "Currently selecting: Open or close the keyboard control, currently is ",
   "Currently selecting: Open or close the voice control, currently is ",
 ];
+// system record
+var systemKeyName;
 
 // for tutorial
 var tutorialUrl = "https://luowenqiao.github.io/Screen-Reader-for-Twine/tutorial.html";
@@ -42,18 +44,19 @@ chrome.runtime.onMessage.addListener(
     // Start the screen reader when Twine page detected, tutorial
     // message {situation: String}
     if(request.situation && request.situation == "start"){
+      systemKeyName = request.systemName.indexOf("Mac")!=-1?"Command":"Control";
       chrome.tabs.query({active:true,currentWindow:true}, function(tabs) {
         if(tabs[0].url == tutorialUrl){
           normalSpeak(
             "Welcome to the screen reader for Twine games tutorial. " +
-            "You can press Command, Shift, and Space to start or stop reading."
+            "You can press"+systemKeyName+", Shift, and Space to start or stop reading."
           );
         }else{
           normalSpeak(
             'Twine game detected. '
-            + 'To open the tutorial, press Command, Shift, and One. '
-            + 'To open or close the settings, press Command, Shift, and "S". '
-            + 'To start or stop reading, press Command, Shift, and Space. ',
+            + 'To open the tutorial, press '+systemKeyName+', Shift, and One. '
+            + 'To open or close the settings, press '+systemKeyName+', Shift, and "S". '
+            + 'To start or stop reading, press '+systemKeyName+', Shift, and Space. ',
           );
         }
       });
@@ -86,8 +89,8 @@ chrome.runtime.onMessage.addListener(
       chrome.storage.sync.get(['speechRate'], function(result) {
         normalSpeak(
           "Settings is opened. " +
-          "Use Command, Shift, Left or Right to select items, " +
-          "use Command, Shift, Up or Down to modify them. "
+          "Use "+systemKeyName+", Shift, Left or Right to select items, " +
+          "use "+systemKeyName+", Shift, Up or Down to modify them. "
           + items[0] + result.speechRate
         );
       });
@@ -127,8 +130,8 @@ chrome.runtime.onMessage.addListener(
     // Tutorial
     if(request.isTutorial == 1){
      normalSpeak("Welcome to the screen reader for Twine tutorial. "
-     +"You can press Command, Shift, One at any time to go back to the game. "
-     +"Press Command, Shift, Space to start or stop reading.")
+     +"You can press "+systemKeyName+", Shift, One at any time to go back to the game. "
+     +"Press "+systemKeyName+", Shift, Space to start or stop reading.")
     }
     if(request.isTutorial == 2){
       normalSpeak("Tutorial is closed. Screen reader is on.")
@@ -158,10 +161,26 @@ chrome.runtime.onMessage.addListener(
           }
           else{
             normalSpeak("This is an example sentence. "
-            +"You can press Command, Shift, Arrow Left or Arrow Right to select the content.")
+            +"You can press "+systemKeyName+", Shift, Arrow Left or Arrow Right to select the content.")
           }
         }
       )
+    }
+
+    // Update
+    if(request.updateInfo == 1){
+      speakContent(["A","You entered a new page, currently selecting: the whole page."])
+    }
+    if(request.updateInfo == 2){
+      speakContent(request.textToRead)
+    }
+
+    // control hint
+    if(request.hint == 1){
+      speakContent(["A", "You have reached the top of the selected content. "].concat(request.txt))
+    }
+    if(request.hint == 2){
+      speakContent(["A", "You have reached the end of the selected content. "].concat(request.txt))
     }
   }
 );

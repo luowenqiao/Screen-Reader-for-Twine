@@ -43,7 +43,7 @@ function DOMToText(DOMelement){
 
     // When reach to the end node that don't have child nodes
     // for example: <img/>, text
-    if(!DOMelement.hasChildNodes()){
+    if(DOMelement.children == undefined){
 
         // Node type 1: Tag properties + nodevalue
         if(DOMelement.nodeType == 1 && nodeToText.hasOwnProperty(DOMelement.nodeName)
